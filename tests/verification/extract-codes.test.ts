@@ -120,4 +120,40 @@ describe("extractVerificationCodes", () => {
 
     expect(codes.length).toBeLessThanOrEqual(5);
   });
+
+  it("extracts a year-like English login code with strong context", () => {
+    const codes = extractVerificationCodes({
+      subject: "",
+      textBody: "Your login code is 2026",
+    });
+
+    expect(codes[0]).toMatchObject({ code: "2026" });
+  });
+
+  it("extracts a year-like Chinese verification code with strong context", () => {
+    const codes = extractVerificationCodes({
+      subject: "",
+      textBody: "验证码是 1999",
+    });
+
+    expect(codes[0]).toMatchObject({ code: "1999" });
+  });
+
+  it("normalizes spaced numeric verification codes", () => {
+    const codes = extractVerificationCodes({
+      subject: "",
+      textBody: "Your code is 123 456",
+    });
+
+    expect(codes[0]).toMatchObject({ code: "123456" });
+  });
+
+  it("does not use subject auth context for unrelated body numbers", () => {
+    const codes = extractVerificationCodes({
+      subject: "Your verification code",
+      textBody: "Order 123456 is paid.",
+    });
+
+    expect(codes).toEqual([]);
+  });
 });

@@ -36,24 +36,32 @@ const MAX_CANDIDATES = 5;
 const MIN_CONFIDENCE = 40;
 const CODE_PATTERN = /\b[A-Z0-9]{4,8}\b/giu;
 const SEPARATED_DIGIT_PATTERN = /\b\d{3,4}-\d{3,4}\b/gu;
+const SPACED_DIGIT_PATTERN = /\b\d{3}\s+\d{3}\b/gu;
 const DIGIT_PATTERN = /\b\d{4,8}\b/gu;
 
 export function extractVerificationCodes(input: VerificationCodeInput): VerificationCodeCandidate[] {
-  const combined = `${input.subject}\n${input.textBody}`.replace(/\s+/g, " ").trim();
   const candidates = new Map<string, VerificationCodeCandidate>();
 
-  if (!combined) {
-    return [];
-  }
-
-  addCandidates(candidates, combined, CODE_PATTERN, true);
-  addCandidates(candidates, combined, SEPARATED_DIGIT_PATTERN, false);
-  addCandidates(candidates, combined, DIGIT_PATTERN, false);
+  addSegmentCandidates(candidates, input.subject);
+  addSegmentCandidates(candidates, input.textBody);
 
   return Array.from(candidates.values())
     .filter((candidate) => candidate.confidence >= MIN_CONFIDENCE)
     .sort((a, b) => b.confidence - a.confidence || a.code.localeCompare(b.code))
     .slice(0, MAX_CANDIDATES);
+}
+
+function addSegmentCandidates(candidates: Map<string, VerificationCodeCandidate>, segment: string) {
+  const text = segment.replace(/\s+/g, " ").trim();
+
+  if (!text) {
+    return;
+  }
+
+  addCandidates(candidates, text, CODE_PATTERN, true);
+  addCandidates(candidates, text, SEPARATED_DIGIT_PATTERN, false);
+  addCandidates(candidates, text, SPACED_DIGIT_PATTERN, false);
+  addCandidates(candidates, text, DIGIT_PATTERN, false);
 }
 
 function addCandidates(
@@ -64,13 +72,9 @@ function addCandidates(
 ) {
   for (const match of text.matchAll(pattern)) {
     const rawCode = match[0];
-    const code = rawCode.replace("-", "").toUpperCase();
+    const code = rawCode.replace(/[-\s]/g, "").toUpperCase();
 
     if (!isValidCode(code, allowAlpha)) {
-      continue;
-    }
-
-    if (/^\d{4}$/.test(code) && looksLikeYear(code)) {
       continue;
     }
 
@@ -97,6 +101,10 @@ function scoreCandidate(
   const contextDistance = getNearbyContextDistance(context, contextIndex, rawCodeLength);
 
   if (contextDistance === null) {
+    return 0;
+  }
+
+  if (/^\d{4}$/.test(code) && looksLikeYear(code) && contextDistance > 8) {
     return 0;
   }
 
