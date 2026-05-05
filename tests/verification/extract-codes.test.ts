@@ -47,4 +47,77 @@ describe("extractVerificationCodes", () => {
 
     expect(codes).toEqual([]);
   });
+
+  it("does not return context words from a subject-only verification email", () => {
+    const codes = extractVerificationCodes({
+      subject: "Your verification code",
+      textBody: "",
+    });
+
+    expect(codes).toEqual([]);
+  });
+
+  it("does not return pure-letter context words", () => {
+    const codes = extractVerificationCodes({
+      subject: "",
+      textBody: "Use security code 123456",
+    });
+
+    expect(codes.map((candidate) => candidate.code)).toEqual(["123456"]);
+  });
+
+  it("ignores unrelated receipt order and tracking numbers", () => {
+    const codes = extractVerificationCodes({
+      subject: "Receipt 123456",
+      textBody: "Order 123456 is paid. Tracking number 837261 shipped.",
+    });
+
+    expect(codes).toEqual([]);
+  });
+
+  it("returns an empty list for whitespace-only input", () => {
+    const codes = extractVerificationCodes({
+      subject: "   ",
+      textBody: "\n\t  ",
+    });
+
+    expect(codes).toEqual([]);
+  });
+
+  it("extracts a simplified Chinese check code", () => {
+    const codes = extractVerificationCodes({
+      subject: "校验码",
+      textBody: "您的校验码是 541287。",
+    });
+
+    expect(codes[0]).toMatchObject({ code: "541287" });
+  });
+
+  it("extracts a traditional Chinese verification code", () => {
+    const codes = extractVerificationCodes({
+      subject: "驗證碼",
+      textBody: "您的驗證碼是 382914。",
+    });
+
+    expect(codes[0]).toMatchObject({ code: "382914" });
+  });
+
+  it("normalizes separated numeric verification codes", () => {
+    const codes = extractVerificationCodes({
+      subject: "Your login code",
+      textBody: "Your login code is 123-456",
+    });
+
+    expect(codes[0]).toMatchObject({ code: "123456" });
+  });
+
+  it("caps returned candidates", () => {
+    const codes = extractVerificationCodes({
+      subject: "Your verification codes",
+      textBody:
+        "Code 111111. Code 222222. Code 333333. Code 444444. Code 555555. Code 666666. Code 777777.",
+    });
+
+    expect(codes.length).toBeLessThanOrEqual(5);
+  });
 });
