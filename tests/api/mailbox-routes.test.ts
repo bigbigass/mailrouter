@@ -12,6 +12,7 @@ vi.mock("@/lib/env", () => ({
     CLOUDFLARE_API_TOKEN: "token",
     CLOUDFLARE_ZONE_ID: "zone",
     EMAIL_DOMAIN: "example.com",
+    EMAIL_WORKER_NAME: "email-worker",
     MAX_ACTIVE_MAILBOXES_PER_USER: 5,
   },
 }));

@@ -1,0 +1,32 @@
+{
+  "app": {
+    "baseUrl": "http://localhost:3000"
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "email_app",
+    "schema": "public",
+    "user": "postgres",
+    "password": "postgres",
+    "ssl": false
+  },
+  "security": {
+    "sessionSecret": "replace-with-32-byte-random-secret",
+    "ingestSecret": "replace-with-separate-32-byte-random-secret"
+  },
+  "cloudflare": {
+    "apiToken": "replace-with-cloudflare-token",
+    "accountId": "replace-with-account-id",
+    "zoneId": "replace-with-zone-id",
+    "emailDomain": "example.com",
+    "workerName": "email-worker"
+  },
+  "limits": {
+    "maxActiveMailboxesPerUser": 5,
+    "maxIngestBodyBytes": 1048576
+  },
+  "worker": {
+    "appIngestUrl": "https://app.example.com/api/email/ingest"
+  }
+}

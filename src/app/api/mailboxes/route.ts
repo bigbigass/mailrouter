@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       requestedLocalPart: parsed.data.localPart,
       domain: env.EMAIL_DOMAIN,
       maxActiveMailboxes: env.MAX_ACTIVE_MAILBOXES_PER_USER,
-      workerName: "email-worker",
+      workerName: env.EMAIL_WORKER_NAME,
       db: prisma,
       cloudflare: new CloudflareEmailRoutingClient({
         apiToken: env.CLOUDFLARE_API_TOKEN,

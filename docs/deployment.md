@@ -1,37 +1,81 @@
 # Deployment
 
-## App Environment
+## Local Configuration File
 
-Set these variables on the HTTPS host running the Next.js app:
+All values you need to fill in live in one file:
 
-- `DATABASE_URL`
-- `APP_BASE_URL`
-- `SESSION_SECRET`
-- `INGEST_SECRET`
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_ZONE_ID`
-- `EMAIL_DOMAIN`
-- `MAX_ACTIVE_MAILBOXES_PER_USER`
-- `MAX_INGEST_BODY_BYTES`
+```text
+config/app.config.json
+```
 
-`SESSION_SECRET` and `INGEST_SECRET` must be different random values with at least 32 characters.
+Create it from the committed example:
+
+```powershell
+Copy-Item config/app.config.example.json config/app.config.json
+```
+
+Fill in these sections:
+
+- `app.baseUrl`: public URL of the Next.js app.
+- `database`: PostgreSQL host, port, database name, schema, username, password, and SSL flag.
+- `security.sessionSecret`: random session secret with at least 32 characters.
+- `security.ingestSecret`: separate random Worker ingest secret with at least 32 characters.
+- `cloudflare.apiToken`: Cloudflare API token with Email Routing rule permissions.
+- `cloudflare.accountId`: Cloudflare account ID.
+- `cloudflare.zoneId`: Cloudflare zone ID for the email domain.
+- `cloudflare.emailDomain`: domain used for generated mailboxes.
+- `cloudflare.workerName`: Email Worker name, normally `email-worker`.
+- `limits`: mailbox quota and maximum Worker ingest body size.
+- `worker.appIngestUrl`: full URL to the app ingest route, for example `https://your-app.example.com/api/email/ingest`.
+
+`config/app.config.json` is ignored by git because it contains secrets and account credentials.
+
+Environment variables are still supported as deployment overrides. For normal local operation, edit only `config/app.config.json`.
+
+## Database
+
+The app scripts generate Prisma's `DATABASE_URL` from the `database` section of `config/app.config.json`.
+
+Run migrations before starting the app:
+
+```powershell
+npm run prisma:migrate
+```
+
+Generate the Prisma client manually if needed:
+
+```powershell
+npm run prisma:generate
+```
+
+## App
+
+Start local development:
+
+```powershell
+npm run dev
+```
+
+Build for deployment:
+
+```powershell
+npm run build
+```
 
 ## Cloudflare Requirements
 
 Enable Email Routing for the zone and configure the DNS records Cloudflare requires for inbound mail.
 
-Deploy the Email Worker named `email-worker`. The app creates Email Routing rules that match each mailbox address and route matching messages to that Worker.
+The app creates Email Routing rules that match each mailbox address and route matching messages to the configured Worker.
 
-The Cloudflare API token used by the app needs permission to manage Email Routing rules for the configured zone. Keep `CLOUDFLARE_ZONE_ID` aligned with `EMAIL_DOMAIN`.
+The Cloudflare API token needs permission to manage Email Routing rules for `cloudflare.zoneId`.
 
 ## Worker Configuration
 
-Update `worker/wrangler.toml` before deployment:
+Generate `worker/wrangler.toml` from `config/app.config.json`:
 
-```toml
-[vars]
-APP_INGEST_URL = "https://your-app.example.com/api/email/ingest"
+```powershell
+npm run config:sync-worker
 ```
 
 Set the Worker ingest secret:
@@ -40,23 +84,13 @@ Set the Worker ingest secret:
 npx wrangler secret put INGEST_SECRET --config worker/wrangler.toml
 ```
 
-The value must match the app's `INGEST_SECRET`.
+Use the same value as `security.ingestSecret` in `config/app.config.json`.
 
 Deploy the Worker:
 
 ```powershell
 npm --prefix worker run deploy
 ```
-
-## Database
-
-Run migrations before starting the production app:
-
-```powershell
-npm run prisma:migrate
-```
-
-For local first-time setup, create a PostgreSQL database matching `DATABASE_URL`, then run the same migration command.
 
 ## Build Checks
 
