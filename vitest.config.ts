@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    exclude: ["**/node_modules/**", "**/.git/**", "**/.worktrees/**"],
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
