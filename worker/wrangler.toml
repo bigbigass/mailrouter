@@ -1,0 +1,6 @@
+name = "email-worker"
+main = "src/index.ts"
+compatibility_date = "2026-05-05"
+
+[vars]
+APP_INGEST_URL = "https://app.example.com/api/email/ingest"
