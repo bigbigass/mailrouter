@@ -26,6 +26,10 @@ export function validateLocalPart(input: string): LocalPartValidationResult {
   return { ok: true, value };
 }
 
+export function normalizeDomain(domain: string): string {
+  return domain.trim().toLowerCase();
+}
+
 export function buildMailboxAddress(localPart: string, domain: string): string {
-  return `${localPart}@${domain}`;
+  return `${localPart}@${normalizeDomain(domain)}`;
 }
