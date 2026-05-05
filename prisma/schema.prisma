@@ -61,7 +61,6 @@ model Mailbox {
   verificationCodes VerificationCode[]
 
   @@index([userId, status])
-  @@index([address])
   @@map("mailboxes")
 }
 
@@ -82,6 +81,7 @@ model Message {
 
   @@index([mailboxId, receivedAt])
   @@index([messageId])
+  @@unique([id, mailboxId])
   @@map("messages")
 }
 
@@ -94,7 +94,7 @@ model VerificationCode {
   context    String
   createdAt  DateTime @default(now())
 
-  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message Message @relation(fields: [messageId, mailboxId], references: [id, mailboxId], onDelete: Cascade)
   mailbox Mailbox @relation(fields: [mailboxId], references: [id], onDelete: Cascade)
 
   @@index([mailboxId, createdAt])
