@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MailboxStatus {
+  ACTIVE
+  DISABLING
+  DISABLED
+}
+
+enum AuditEventType {
+  USER_REGISTERED
+  LOGIN_FAILED
+  MAILBOX_CREATED
+  MAILBOX_CREATE_FAILED
+  MAILBOX_DISABLE_STARTED
+  MAILBOX_DISABLED
+  MAILBOX_DISABLE_FAILED
+  INGEST_SIGNATURE_FAILED
+  INGEST_UNKNOWN_RECIPIENT
+  INGEST_MESSAGE_STORED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  disabledAt   DateTime?
+
+  mailboxes Mailbox[]
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Mailbox {
+  id               String        @id @default(cuid())
+  userId           String
+  localPart        String
+  domain           String
+  address          String        @unique
+  status           MailboxStatus @default(ACTIVE)
+  cloudflareRuleId String?
+  createdAt        DateTime      @default(now())
+  disabledAt       DateTime?
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages          Message[]
+  verificationCodes VerificationCode[]
+
+  @@index([userId, status])
+  @@index([address])
+  @@map("mailboxes")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  mailboxId   String
+  messageId   String?
+  fromAddress String
+  toAddress   String
+  subject     String
+  textBody    String   @db.Text
+  htmlBody    String?  @db.Text
+  receivedAt  DateTime @default(now())
+  rawSize     Int
+
+  mailbox           Mailbox            @relation(fields: [mailboxId], references: [id], onDelete: Cascade)
+  verificationCodes VerificationCode[]
+
+  @@index([mailboxId, receivedAt])
+  @@index([messageId])
+  @@map("messages")
+}
+
+model VerificationCode {
+  id         String   @id @default(cuid())
+  messageId  String
+  mailboxId  String
+  code       String
+  confidence Int
+  context    String
+  createdAt  DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  mailbox Mailbox @relation(fields: [mailboxId], references: [id], onDelete: Cascade)
+
+  @@index([mailboxId, createdAt])
+  @@index([messageId, confidence])
+  @@map("verification_codes")
+}
+
+model AuditLog {
+  id        String         @id @default(cuid())
+  userId    String?
+  eventType AuditEventType
+  message   String
+  metadata  Json?
+  createdAt DateTime       @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+  @@map("audit_logs")
+}
