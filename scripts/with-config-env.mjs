@@ -12,7 +12,7 @@ if (!existsSync(configPath)) {
 const config = JSON.parse(readFileSync(configPath, "utf8"));
 const env = {
   ...process.env,
-  DATABASE_URL: process.env.DATABASE_URL ?? buildDatabaseUrl(config.database),
+  DATABASE_URL: process.env.DATABASE_URL ?? config.database?.url ?? "file:./dev.db",
   APP_BASE_URL: process.env.APP_BASE_URL ?? config.app.baseUrl,
   SESSION_SECRET: process.env.SESSION_SECRET ?? config.security.sessionSecret,
   INGEST_SECRET: process.env.INGEST_SECRET ?? config.security.ingestSecret,
@@ -41,13 +41,3 @@ const result = spawnSync(command, args, {
 });
 
 process.exit(result.status ?? 1);
-
-function buildDatabaseUrl(database) {
-  const user = encodeURIComponent(database.user);
-  const password = encodeURIComponent(database.password);
-  const name = encodeURIComponent(database.name);
-  const schema = encodeURIComponent(database.schema ?? "public");
-  const sslMode = database.ssl ? "&sslmode=require" : "";
-
-  return `postgresql://${user}:${password}@${database.host}:${database.port}/${name}?schema=${schema}${sslMode}`;
-}

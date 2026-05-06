@@ -1,10 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  engineType = "client"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 enum UserRole {
@@ -71,8 +72,8 @@ model Message {
   fromAddress String
   toAddress   String
   subject     String
-  textBody    String   @db.Text
-  htmlBody    String?  @db.Text
+  textBody    String
+  htmlBody    String?
   receivedAt  DateTime @default(now())
   rawSize     Int
 

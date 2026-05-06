@@ -1,0 +1,34 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "mailrouter-app",
+  "compatibility_date": "2026-05-05",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "mailrouter-app"
+    }
+  ],
+  "vars": {
+    "APP_RUNTIME": "cloudflare",
+    "APP_BASE_URL": "https://mailrouter-app.123liqixin.workers.dev",
+    "EMAIL_DOMAIN": "tokensea.top",
+    "EMAIL_WORKER_NAME": "mailrouter",
+    "WORKER_APP_INGEST_URL": "https://mailrouter-app.123liqixin.workers.dev/api/email/ingest",
+    "MAX_ACTIVE_MAILBOXES_PER_USER": "5",
+    "MAX_INGEST_BODY_BYTES": "1048576"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mail_db",
+      "database_id": "6b2eaad4-cbf6-4781-821f-ba3550b5e05b",
+      "migrations_dir": "prisma/migrations"
+    }
+  ]
+}

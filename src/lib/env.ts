@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().min(1).optional(),
   APP_BASE_URL: z.string().url(),
   SESSION_SECRET: z.string().min(32),
   INGEST_SECRET: z.string().min(32),
@@ -20,7 +20,11 @@ const envSchema = z.object({
   MAX_INGEST_BODY_BYTES: z.coerce.number().int().min(1024).max(5242880),
 });
 
-const databaseConfigSchema = z.object({
+const sqliteDatabaseConfigSchema = z.object({
+  url: z.string().min(1),
+});
+
+const postgresDatabaseConfigSchema = z.object({
   host: z.string().min(1),
   port: z.coerce.number().int().min(1).max(65535),
   name: z.string().min(1),
@@ -29,6 +33,8 @@ const databaseConfigSchema = z.object({
   password: z.string(),
   ssl: z.boolean().default(false),
 });
+
+const databaseConfigSchema = z.union([sqliteDatabaseConfigSchema, postgresDatabaseConfigSchema]);
 
 const configSchema = z.object({
   app: z.object({
@@ -85,6 +91,10 @@ export function configToEnv(config: AppConfig): AppEnv {
 }
 
 export function buildDatabaseUrl(database: DatabaseConfig): string {
+  if ("url" in database) {
+    return database.url;
+  }
+
   const user = encodeURIComponent(database.user);
   const password = encodeURIComponent(database.password);
   const name = encodeURIComponent(database.name);
@@ -103,7 +113,7 @@ export function getEnv(): AppEnv {
 }
 
 function loadEnv(processEnv: NodeJS.ProcessEnv): AppEnv {
-  const configEnv = loadConfigEnv();
+  const configEnv = processEnv.APP_RUNTIME === "cloudflare" ? {} : loadConfigEnv();
   const merged = {
     ...configEnv,
     ...removeUndefined({

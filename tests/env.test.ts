@@ -34,6 +34,15 @@ describe("parseEnv", () => {
     expect(env.MAX_ACTIVE_MAILBOXES_PER_USER).toBe(5);
   });
 
+  it("parses Cloudflare runtime variables without DATABASE_URL", () => {
+    const { DATABASE_URL: _databaseUrl, ...cloudflareEnv } = validProcessEnv();
+
+    const env = parseEnv(cloudflareEnv);
+
+    expect(env.DATABASE_URL).toBeUndefined();
+    expect(env.EMAIL_WORKER_NAME).toBe("email-worker");
+  });
+
   it("rejects short secrets", () => {
     expect(() =>
       parseEnv({

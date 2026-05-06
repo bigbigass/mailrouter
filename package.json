@@ -6,16 +6,25 @@
     "dev": "node scripts/with-config-env.mjs next dev",
     "build": "node scripts/with-config-env.mjs npm run build:inner",
     "build:inner": "prisma generate && next build",
+    "preview": "node scripts/with-cloudflare-env.mjs opennextjs-cloudflare build && node scripts/with-cloudflare-env.mjs opennextjs-cloudflare preview",
+    "deploy": "node scripts/with-cloudflare-env.mjs opennextjs-cloudflare build && node scripts/with-cloudflare-env.mjs opennextjs-cloudflare deploy",
+    "upload": "node scripts/with-cloudflare-env.mjs opennextjs-cloudflare build && node scripts/with-cloudflare-env.mjs opennextjs-cloudflare upload",
     "start": "node scripts/with-config-env.mjs next start",
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
     "prisma:generate": "node scripts/with-config-env.mjs prisma generate",
     "prisma:migrate": "node scripts/with-config-env.mjs prisma migrate dev",
+    "d1:migrate:local": "node scripts/with-cloudflare-env.mjs wrangler d1 migrations apply mail_db --local",
+    "d1:migrate:remote": "node scripts/with-cloudflare-env.mjs wrangler d1 migrations apply mail_db --remote",
+    "cf-typegen": "node scripts/with-cloudflare-env.mjs wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "config:sync-worker": "node scripts/sync-worker-config.mjs",
-    "worker:test": "npm --prefix worker test"
+    "worker:test": "npm --prefix worker test",
+    "worker:deploy": "node scripts/with-cloudflare-env.mjs wrangler --config worker/wrangler.toml deploy"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.6",
+    "@prisma/adapter-d1": "^6.19.3",
     "@prisma/client": "6.19.3",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.3",
@@ -25,17 +34,20 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260505.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.5",
+    "esbuild": "^0.28.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.15",
     "jsdom": "^29.1.1",
     "prisma": "6.19.3",
     "typescript": "^5",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "wrangler": "^4.87.0"
   }
 }

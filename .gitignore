@@ -45,6 +45,8 @@ config/app.config.json
 /.vercel
 
 # cloudflare
+.open-next
+.wrangler
 worker/dist
 worker/.wrangler
 
