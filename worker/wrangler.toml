@@ -3,4 +3,4 @@ main = "src/index.ts"
 compatibility_date = "2026-05-05"
 
 [vars]
-APP_INGEST_URL = "https://mailrouter-app.123liqixin.workers.dev/api/email/ingest"
+APP_INGEST_URL = "https://mailrouter-main.123liqixin.workers.dev/api/email/ingest"

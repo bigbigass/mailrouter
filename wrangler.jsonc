@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "mailrouter-app",
+  "name": "mailrouter-main",
   "compatibility_date": "2026-05-05",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -11,15 +11,15 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "mailrouter-app"
+      "service": "mailrouter-main"
     }
   ],
   "vars": {
     "APP_RUNTIME": "cloudflare",
-    "APP_BASE_URL": "https://mailrouter-app.123liqixin.workers.dev",
+    "APP_BASE_URL": "https://mailrouter-main.123liqixin.workers.dev",
     "EMAIL_DOMAIN": "tokensea.top",
     "EMAIL_WORKER_NAME": "mailrouter",
-    "WORKER_APP_INGEST_URL": "https://mailrouter-app.123liqixin.workers.dev/api/email/ingest",
+    "WORKER_APP_INGEST_URL": "https://mailrouter-main.123liqixin.workers.dev/api/email/ingest",
     "MAX_ACTIVE_MAILBOXES_PER_USER": "5",
     "MAX_INGEST_BODY_BYTES": "1048576"
   },
