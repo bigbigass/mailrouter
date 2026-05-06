@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { PrismaD1 } from "@prisma/adapter-d1";
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 type D1Client = NonNullable<CloudflareEnv["DB"]>;
 
