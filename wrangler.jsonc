@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "mailrouter-app",
+  "name": "mailrouter-main",
   "compatibility_date": "2026-05-05",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
