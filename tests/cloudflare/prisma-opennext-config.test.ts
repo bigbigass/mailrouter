@@ -20,10 +20,9 @@ describe("Prisma OpenNext Cloudflare configuration", () => {
     );
   });
 
-  it("imports PrismaClient from the default generated package", () => {
-    const dbModule = readFileSync("src/lib/db.ts", "utf8");
+  it("documents the bundled Prisma WASM asset required by the Cloudflare worker", () => {
+    const packageJson = readFileSync("package.json", "utf8");
 
-    expect(dbModule).toContain('import { PrismaClient } from "@prisma/client";');
-    expect(dbModule).not.toContain("@/generated/prisma/client");
+    expect(packageJson).toContain("scripts/copy-prisma-cloudflare-assets.mjs");
   });
 });
