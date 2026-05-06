@@ -6,7 +6,7 @@
     "dev": "node scripts/with-config-env.mjs next dev",
     "build": "npm run cf:build",
     "build:next": "prisma generate && next build",
-    "cf:build": "prisma generate && opennextjs-cloudflare build && node scripts/copy-prisma-cloudflare-assets.mjs",
+    "cf:build": "prisma generate && opennextjs-cloudflare build",
     "preview": "node scripts/with-cloudflare-env.mjs npm run cf:build && node scripts/with-cloudflare-env.mjs opennextjs-cloudflare preview",
     "deploy": "node scripts/with-cloudflare-env.mjs npm run cf:build && node scripts/with-cloudflare-env.mjs opennextjs-cloudflare deploy",
     "upload": "node scripts/with-cloudflare-env.mjs npm run cf:build && node scripts/with-cloudflare-env.mjs opennextjs-cloudflare upload",

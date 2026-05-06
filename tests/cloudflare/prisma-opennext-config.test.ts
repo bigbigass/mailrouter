@@ -2,27 +2,26 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("Prisma OpenNext Cloudflare configuration", () => {
-  it("uses the default Prisma Client output so OpenNext can patch it", () => {
+  it("generates Prisma Client for the Cloudflare runtime from a checked-in output path", () => {
     const schema = readFileSync("prisma/schema.prisma", "utf8");
     const generatorBlock = schema.match(/generator\s+client\s+\{[\s\S]*?\}/)?.[0];
 
     expect(generatorBlock).toBeDefined();
-    expect(generatorBlock).toContain('provider   = "prisma-client-js"');
-    expect(generatorBlock).toContain('engineType = "client"');
-    expect(generatorBlock).not.toMatch(/^\s*output\s*=/m);
+    expect(generatorBlock).toContain('provider = "prisma-client"');
+    expect(generatorBlock).toContain('output   = "../src/generated/prisma"');
+    expect(generatorBlock).toContain('runtime  = "cloudflare"');
   });
 
-  it("keeps Prisma packages external for workerd-specific exports", () => {
-    const nextConfig = readFileSync("next.config.ts", "utf8");
+  it("imports PrismaClient from the generated Cloudflare runtime client", () => {
+    const dbModule = readFileSync("src/lib/db.ts", "utf8");
 
-    expect(nextConfig).toContain(
-      'serverExternalPackages: ["@prisma/client", ".prisma/client"]',
-    );
+    expect(dbModule).toContain('import { PrismaClient } from "@/generated/prisma/client";');
+    expect(dbModule).not.toContain('from "@prisma/client"');
   });
 
-  it("documents the bundled Prisma WASM asset required by the Cloudflare worker", () => {
+  it("does not rely on the old Prisma WASM copy workaround", () => {
     const packageJson = readFileSync("package.json", "utf8");
 
-    expect(packageJson).toContain("scripts/copy-prisma-cloudflare-assets.mjs");
+    expect(packageJson).not.toContain("copy-prisma-cloudflare-assets.mjs");
   });
 });
