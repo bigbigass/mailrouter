@@ -58,3 +58,6 @@ worker/.wrangler
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated
+src/generated/prisma
